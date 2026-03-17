@@ -115,13 +115,16 @@ export type Database = {
       }
       round_holes: {
         Row: {
+          approach_distance: number | null
           approach_result: string | null
+          approach_start_lie: string | null
           fairway_hit: boolean | null
           gir: boolean | null
           hole_number: number
           id: string
           par: number
           penalty_strokes: number
+          putt_distance_feet: number | null
           putts: number | null
           round_id: string
           sand_save_attempted: boolean | null
@@ -133,13 +136,16 @@ export type Database = {
           yardage: number
         }
         Insert: {
+          approach_distance?: number | null
           approach_result?: string | null
+          approach_start_lie?: string | null
           fairway_hit?: boolean | null
           gir?: boolean | null
           hole_number: number
           id?: string
           par: number
           penalty_strokes?: number
+          putt_distance_feet?: number | null
           putts?: number | null
           round_id: string
           sand_save_attempted?: boolean | null
@@ -153,13 +159,16 @@ export type Database = {
           yardage: number
         }
         Update: {
+          approach_distance?: number | null
           approach_result?: string | null
+          approach_start_lie?: string | null
           fairway_hit?: boolean | null
           gir?: boolean | null
           hole_number?: number
           id?: string
           par?: number
           penalty_strokes?: number
+          putt_distance_feet?: number | null
           putts?: number | null
           round_id?: string
           sand_save_attempted?: boolean | null

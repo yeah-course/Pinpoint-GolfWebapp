@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Globe, Lock } from "lucide-react";
 import { computeRoundStats, getScoreColor, getScoreLabel } from "@/lib/stats";
+import { computeRoundSG, type RoundSG } from "@/lib/strokes-gained";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -71,6 +72,8 @@ export default function RoundDetail() {
   }
 
   const stats = computeRoundStats(holes);
+  const sg = computeRoundSG(holes);
+  const hasSGData = sg.holes.length > 0 && sg.holes.some(h => h.sgPutting != null || h.sgTee != null || h.sgApproach != null);
 
   return (
     <AppShell>
@@ -105,6 +108,9 @@ export default function RoundDetail() {
           <StatBox label="Penalties" value={String(stats.totalPenalties)} />
           <StatBox label="Scrambling" value={stats.scramblingPercent != null ? `${Math.round(stats.scramblingPercent)}%` : "—"} />
         </div>
+
+        {/* Strokes Gained */}
+        {hasSGData && <SGBreakdown sg={sg} />}
 
         {/* Hole Scoring Strip */}
         <div className="flex gap-1 flex-wrap">
@@ -170,6 +176,38 @@ function StatBox({ label, value }: { label: string; value: string }) {
       <CardContent className="py-3 px-4">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-xl font-bold tabular-nums font-display">{value}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SGBreakdown({ sg }: { sg: RoundSG }) {
+  const categories = [
+    { label: "Total", value: sg.total },
+    { label: "Off the Tee", value: sg.tee },
+    { label: "Approach", value: sg.approach },
+    { label: "Around Green", value: sg.aroundGreen },
+    { label: "Putting", value: sg.putting },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-base">Strokes Gained</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {categories.map((cat) => (
+            <div key={cat.label} className="text-center">
+              <p className="text-xs text-muted-foreground">{cat.label}</p>
+              <p className={`text-lg font-bold tabular-nums font-display ${
+                cat.value > 0.05 ? "text-birdie" : cat.value < -0.05 ? "text-bogey" : "text-foreground"
+              }`}>
+                {cat.value >= 0 ? "+" : ""}{cat.value.toFixed(1)}
+              </p>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
