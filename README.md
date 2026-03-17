@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Making a golf stats tracker webapp
 
-TODO: Document your project here
+## Starting with basic functionality of acocunts, basic stats, nice ui.
