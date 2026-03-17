@@ -49,9 +49,9 @@ export function computeHoleSG(hole: RoundHole): HoleSG | null {
 
   if (score == null || putts == null) return null;
 
-  // Approach data from extended columns
-  const approachDistance = (hole as any).approach_distance as number | null;
-  const approachStartLie = (hole as any).approach_start_lie as ShotLie | null;
+  // Approach data — par 3s auto-use hole yardage from tee
+  const approachDistance: number | null = par === 3 ? yardage : ((hole as any).approach_distance as number | null);
+  const approachStartLie: ShotLie | null = par === 3 ? "tee" : ((hole as any).approach_start_lie as ShotLie | null);
   const puttDistanceFeet = (hole as any).putt_distance_feet as number | null;
 
   const result: HoleSG = {
