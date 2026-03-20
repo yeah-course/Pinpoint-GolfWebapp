@@ -224,7 +224,7 @@ export default function RoundPlay() {
             colorFn={(v) => hole.score === v ? getScoreColor(v, hole.par) : undefined}
             allowCustom
             customLabel="Other"
-            min={1}
+            min={scoreMax + 1}
             max={20}
             onCustom={(v) => updateHole({ score: v })}
           />
