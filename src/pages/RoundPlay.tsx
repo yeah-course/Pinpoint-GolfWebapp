@@ -168,8 +168,8 @@ export default function RoundPlay() {
 
   const scoreLabel = hole.score != null ? getScoreLabel(hole.score, hole.par) : null;
 
-  // Build score buttons: show par-2 to par+4, minimum 1
-  const scoreMin = Math.max(1, hole.par - 2);
+  // Build score buttons: always include 1, then use "Other" for values above the preset range
+  const scoreMin = 1;
   const scoreMax = hole.par + 4;
   const scoreButtons = Array.from({ length: scoreMax - scoreMin + 1 }, (_, i) => scoreMin + i);
 
