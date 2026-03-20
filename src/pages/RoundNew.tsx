@@ -6,12 +6,61 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Zap, BarChart3, SlidersHorizontal } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Course = Tables<"courses">;
 type TeeSet = Tables<"tee_sets">;
+
+export type CustomFields = {
+  fairway: boolean;
+  approach_lie: boolean;
+  approach_distance: boolean;
+  penalties: boolean;
+  putt_distance: boolean;
+  gir_override: boolean;
+};
+
+const DEFAULT_CUSTOM_FIELDS: CustomFields = {
+  fairway: true,
+  approach_lie: true,
+  approach_distance: true,
+  penalties: true,
+  putt_distance: false,
+  gir_override: false,
+};
+
+const FIELD_LABELS: Record<keyof CustomFields, string> = {
+  fairway: "Tee shot result",
+  approach_lie: "Approach start lie",
+  approach_distance: "Approach distance",
+  penalties: "Penalty strokes",
+  putt_distance: "First putt distance",
+  gir_override: "GIR override",
+};
+
+const MODES = [
+  {
+    value: "quick" as const,
+    label: "Quick",
+    icon: Zap,
+    desc: "Score & putts only — fastest entry",
+  },
+  {
+    value: "standard" as const,
+    label: "Standard",
+    icon: BarChart3,
+    desc: "Core stats for solid analytics",
+  },
+  {
+    value: "advanced" as const,
+    label: "Custom",
+    icon: SlidersHorizontal,
+    desc: "Choose exactly what to track",
+  },
+];
 
 export default function RoundNew() {
   const { user } = useAuth();
@@ -22,7 +71,8 @@ export default function RoundNew() {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedTee, setSelectedTee] = useState("");
   const [holesPlayed, setHolesPlayed] = useState<9 | 18>(18);
-  const [mode, setMode] = useState<"quick" | "standard">("standard");
+  const [mode, setMode] = useState<"quick" | "standard" | "advanced">("standard");
+  const [customFields, setCustomFields] = useState<CustomFields>(DEFAULT_CUSTOM_FIELDS);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,14 +91,12 @@ export default function RoundNew() {
     if (!user || !selectedCourse || !selectedTee) return;
     setLoading(true);
 
-    // Get hole data for selected tee
     const { data: courseHoles } = await supabase
       .from("course_holes")
       .select("*")
       .eq("tee_set_id", selectedTee)
       .order("hole_number");
 
-    // Create round
     const { data: round, error } = await supabase
       .from("rounds")
       .insert({
@@ -67,7 +115,6 @@ export default function RoundNew() {
       return;
     }
 
-    // Pre-create round_holes rows
     const holes = (courseHoles ?? [])
       .filter((h) => h.hole_number <= holesPlayed)
       .map((h) => ({
@@ -79,6 +126,11 @@ export default function RoundNew() {
 
     if (holes.length > 0) {
       await supabase.from("round_holes").insert(holes);
+    }
+
+    // Store custom fields in sessionStorage for the play screen
+    if (mode === "advanced") {
+      sessionStorage.setItem(`custom_fields_${round.id}`, JSON.stringify(customFields));
     }
 
     setLoading(false);
@@ -154,28 +206,63 @@ export default function RoundNew() {
             </div>
 
             {/* Mode */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Entry Mode</Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={mode === "quick" ? "default" : "outline"}
-                  onClick={() => setMode("quick")}
-                  className="flex-1 tap-target"
-                >
-                  Quick
-                </Button>
-                <Button
-                  variant={mode === "standard" ? "default" : "outline"}
-                  onClick={() => setMode("standard")}
-                  className="flex-1 tap-target"
-                >
-                  Standard
-                </Button>
+              <div className="grid gap-2">
+                {MODES.map((m) => {
+                  const Icon = m.icon;
+                  const selected = mode === m.value;
+                  return (
+                    <button
+                      key={m.value}
+                      onClick={() => setMode(m.value)}
+                      className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all active:scale-[0.98] ${
+                        selected
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border bg-card hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-lg ${
+                        selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      }`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${selected ? "text-foreground" : "text-foreground"}`}>
+                          {m.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{m.desc}</p>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        selected ? "border-primary" : "border-muted-foreground/30"
+                      }`}>
+                        {selected && <div className="w-2 h-2 rounded-full bg-primary" />}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {mode === "quick" ? "Score + Putts only" : "Score + Putts + Fairway + GIR + Penalties"}
-              </p>
             </div>
+
+            {/* Custom field toggles */}
+            {mode === "advanced" && (
+              <div className="space-y-3 pt-1">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Fields to track</Label>
+                <div className="space-y-2">
+                  {(Object.keys(FIELD_LABELS) as (keyof CustomFields)[]).map((key) => (
+                    <div key={key} className="flex items-center justify-between py-1.5">
+                      <span className="text-sm">{FIELD_LABELS[key]}</span>
+                      <Switch
+                        checked={customFields[key]}
+                        onCheckedChange={(checked) =>
+                          setCustomFields((prev) => ({ ...prev, [key]: checked }))
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button
               className="w-full tap-target"
