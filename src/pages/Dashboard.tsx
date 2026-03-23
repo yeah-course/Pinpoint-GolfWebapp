@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [allHoles, setAllHoles] = useState<Record<string, RoundHole[]>>({});
   const [loading, setLoading] = useState(true);
+  const [sgTimeframe, setSgTimeframe] = useState("5");
 
   useEffect(() => {
     if (!user) return;
