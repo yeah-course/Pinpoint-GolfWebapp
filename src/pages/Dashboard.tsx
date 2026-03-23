@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Target, Flag as FlagIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { computeRoundStats, getScoreColor } from "@/lib/stats";
+import { aggregateSG } from "@/lib/sg-aggregate";
+import { GameRadarChart } from "@/components/dashboard/GameRadarChart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Round = Tables<"rounds"> & { courses: { name: string } | null };
