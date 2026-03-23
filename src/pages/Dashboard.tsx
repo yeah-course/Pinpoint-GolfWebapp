@@ -58,6 +58,23 @@ export default function Dashboard() {
     ? computeRoundStats(allHoles[rounds[0].id])
     : null;
 
+  const sgData = useMemo(() => {
+    if (rounds.length === 0) return null;
+    let selectedIds: string[];
+    if (sgTimeframe === "30d") {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      selectedIds = rounds
+        .filter((r) => new Date(r.date_played) >= cutoff)
+        .map((r) => r.id);
+    } else {
+      const n = parseInt(sgTimeframe, 10);
+      selectedIds = rounds.slice(0, n).map((r) => r.id);
+    }
+    if (selectedIds.length === 0) return null;
+    return aggregateSG(allHoles, selectedIds);
+  }, [rounds, allHoles, sgTimeframe]);
+
   return (
     <AppShell>
       <div className="px-4 py-6 md:px-8 md:py-8 max-w-4xl mx-auto space-y-6">
