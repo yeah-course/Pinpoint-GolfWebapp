@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Target, Flag as FlagIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { computeRoundStats, getScoreColor } from "@/lib/stats";
+import { aggregateSG } from "@/lib/sg-aggregate";
+import { GameRadarChart } from "@/components/dashboard/GameRadarChart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Round = Tables<"rounds"> & { courses: { name: string } | null };
@@ -17,6 +20,7 @@ export default function Dashboard() {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [allHoles, setAllHoles] = useState<Record<string, RoundHole[]>>({});
   const [loading, setLoading] = useState(true);
+  const [sgTimeframe, setSgTimeframe] = useState("5");
 
   useEffect(() => {
     if (!user) return;
@@ -53,6 +57,23 @@ export default function Dashboard() {
   const latestStats = rounds.length > 0 && allHoles[rounds[0].id]
     ? computeRoundStats(allHoles[rounds[0].id])
     : null;
+
+  const sgData = useMemo(() => {
+    if (rounds.length === 0) return null;
+    let selectedIds: string[];
+    if (sgTimeframe === "30d") {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      selectedIds = rounds
+        .filter((r) => new Date(r.date_played) >= cutoff)
+        .map((r) => r.id);
+    } else {
+      const n = parseInt(sgTimeframe, 10);
+      selectedIds = rounds.slice(0, n).map((r) => r.id);
+    }
+    if (selectedIds.length === 0) return null;
+    return aggregateSG(allHoles, selectedIds);
+  }, [rounds, allHoles, sgTimeframe]);
 
   return (
     <AppShell>
@@ -100,6 +121,27 @@ export default function Dashboard() {
                 <StatCard label="GIR" value={latestStats.girPercent != null ? `${Math.round(latestStats.girPercent)}%` : "—"} icon={<Target className="h-4 w-4 text-primary" />} />
                 <StatCard label="Avg Putts" value={latestStats.avgPutts != null ? latestStats.avgPutts.toFixed(1) : "—"} />
                 <StatCard label="FIR" value={latestStats.firPercent != null ? `${Math.round(latestStats.firPercent)}%` : "—"} />
+              </div>
+            )}
+
+            {/* Game Shape Radar */}
+            {sgData && sgData.roundCount > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-display font-semibold">Game Shape</h2>
+                  <Select value={sgTimeframe} onValueChange={setSgTimeframe}>
+                    <SelectTrigger className="w-[130px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">Last 5 rounds</SelectItem>
+                      <SelectItem value="10">Last 10 rounds</SelectItem>
+                      <SelectItem value="20">Last 20 rounds</SelectItem>
+                      <SelectItem value="30d">Last 30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <GameRadarChart data={sgData.categories} roundCount={sgData.roundCount} />
               </div>
             )}
 
