@@ -124,6 +124,27 @@ export default function Dashboard() {
               </div>
             )}
 
+            {/* Game Shape Radar */}
+            {sgData && sgData.roundCount > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-display font-semibold">Game Shape</h2>
+                  <Select value={sgTimeframe} onValueChange={setSgTimeframe}>
+                    <SelectTrigger className="w-[130px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">Last 5 rounds</SelectItem>
+                      <SelectItem value="10">Last 10 rounds</SelectItem>
+                      <SelectItem value="20">Last 20 rounds</SelectItem>
+                      <SelectItem value="30d">Last 30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <GameRadarChart data={sgData.categories} roundCount={sgData.roundCount} />
+              </div>
+            )}
+
             {/* Recent Rounds */}
             <div>
               <h2 className="text-lg font-display font-semibold mb-3">Recent Rounds</h2>
