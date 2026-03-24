@@ -38,6 +38,7 @@ const App = () => (
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+            <Route path="/overview" element={<AuthGuard><GameOverview /></AuthGuard>} />
             <Route path="/rounds" element={<AuthGuard><Rounds /></AuthGuard>} />
             <Route path="/rounds/new" element={<AuthGuard><RoundNew /></AuthGuard>} />
             <Route path="/rounds/:id/play" element={<AuthGuard><RoundPlay /></AuthGuard>} />
