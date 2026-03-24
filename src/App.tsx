@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import GameOverview from "./pages/GameOverview";
 import Rounds from "./pages/Rounds";
 import RoundNew from "./pages/RoundNew";
 import RoundPlay from "./pages/RoundPlay";
