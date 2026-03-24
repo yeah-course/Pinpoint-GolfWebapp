@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import GameOverview from "./pages/GameOverview";
 import Rounds from "./pages/Rounds";
 import RoundNew from "./pages/RoundNew";
 import RoundPlay from "./pages/RoundPlay";
@@ -37,6 +38,7 @@ const App = () => (
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+            <Route path="/overview" element={<AuthGuard><GameOverview /></AuthGuard>} />
             <Route path="/rounds" element={<AuthGuard><Rounds /></AuthGuard>} />
             <Route path="/rounds/new" element={<AuthGuard><RoundNew /></AuthGuard>} />
             <Route path="/rounds/:id/play" element={<AuthGuard><RoundPlay /></AuthGuard>} />

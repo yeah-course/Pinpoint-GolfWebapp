@@ -1,8 +1,9 @@
-import { LayoutDashboard, Flag, MapPin, User } from "lucide-react";
+import { LayoutDashboard, Flag, MapPin, User, Crosshair } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 const tabs = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/overview", icon: Crosshair, label: "Overview" },
   { to: "/rounds", icon: Flag, label: "Rounds" },
   { to: "/courses", icon: MapPin, label: "Courses" },
   { to: "/profile", icon: User, label: "Profile" },

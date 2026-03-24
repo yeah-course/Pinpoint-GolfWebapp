@@ -1,10 +1,11 @@
-import { LayoutDashboard, Flag, MapPin, User, LogOut } from "lucide-react";
+import { LayoutDashboard, Flag, MapPin, User, LogOut, Crosshair } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
 const links = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/overview", icon: Crosshair, label: "Overview" },
   { to: "/rounds", icon: Flag, label: "Rounds" },
   { to: "/courses", icon: MapPin, label: "Courses" },
   { to: "/profile", icon: User, label: "Profile" },
