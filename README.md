@@ -1,3 +1,5 @@
 # Making a golf stats tracker webapp
 
-## Starting with basic functionality of acocunts, basic stats, nice ui.
+## Basic functionality: Login system, Inputting course details, inputting round stats, displaying SG.
+
+## Additional functionality added: Graphs
